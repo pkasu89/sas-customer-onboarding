@@ -234,3 +234,58 @@ For example:
 
 This project demonstrates an automated, repeatable customer onboarding workflow with GitHub Actions, Python, Helm, and Kubernetes. It provisions customer-specific application resources and deploys personalized welcome pages with minimal manual intervention.
 
+## Selected SAS Challenge Objectives
+
+This solution focuses on three objectives from the SAS Interview Challenge.
+
+### Objective 2 - Data Deployment to Web Servers
+
+Customer-specific information is deployed to Kubernetes using Helm and ConfigMaps.
+
+Each customer receives a dedicated namespace, NGINX Deployment, and Kubernetes Service. The ConfigMap provides a personalized HTML welcome page containing the company name, company motto, and "Welcome to SAS" message.
+
+Two NGINX replicas provide basic availability.
+
+### Objective 5 - Pipeline Orchestration
+
+GitHub Actions coordinates the customer onboarding process using a Windows self-hosted runner.
+
+The workflow accepts customer details, generates a JSON payload, validates the information using Python, verifies Kubernetes connectivity, and deploys the application through Helm.
+
+The current demonstration uses manual workflow dispatch. In a production environment, a purchase system could trigger onboarding automatically through a webhook or event queue.
+
+### Objective 8 - Configuration Management
+
+Helm templates provide a reusable approach to customer-specific Kubernetes configurations.
+
+Customer details are passed into Helm and used to generate the ConfigMap, Deployment, and Service. Each customer has an independent Helm release, allowing deployments to be managed separately.
+
+## Scalability Considerations
+
+The solution is designed to support multiple customers through dedicated Kubernetes namespaces and Helm releases.
+
+To scale toward 10-100 customers, production improvements would include resource quotas, automated capacity management, ingress-based routing, and monitoring.
+
+The current implementation has not been load-tested for 100 customers.
+
+## Error Handling and Recovery
+
+Python validates customer input before deployment.
+
+Helm waits for Kubernetes resources to become ready and uses rollback-on-failure to recover from unsuccessful upgrades.
+
+For production use, additional improvements would include retry policies, structured logging, alerting, and automated recovery procedures.
+
+## Security Considerations
+
+Customer namespaces provide a logical separation of Kubernetes resources but are not a complete security boundary.
+
+A production implementation should include Kubernetes RBAC, network policies, input sanitization, TLS, and secure secrets management.
+
+The self-hosted GitHub Actions runner should be restricted to trusted workflows and repositories.
+
+## Production Architecture - Future Enhancement
+
+Purchase Completed -> Purchase Webhook -> Event Queue -> Onboarding Pipeline -> Python Validation -> Helm Deployment -> Kubernetes -> Customer Website
+
+This is a proposed production architecture, not functionality currently implemented in the demonstration.
