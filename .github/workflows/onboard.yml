@@ -55,3 +55,8 @@ jobs:
           helm version --short
           kubectl config current-context
           kubectl get nodes
+
+      - name: Deploy customer to Kubernetes
+        shell: powershell
+        run: |
+          python scripts/onboard.py purchase.json
