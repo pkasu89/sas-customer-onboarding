@@ -1,0 +1,55 @@
+name: SAS Customer Onboarding
+
+on:
+  workflow_dispatch:
+    inputs:
+      customer_id:
+        description: "Customer ID"
+        required: true
+        type: string
+
+      company_name:
+        description: "Company Name"
+        required: true
+        type: string
+
+      motto:
+        description: "Company Motto"
+        required: true
+        type: string
+
+jobs:
+  onboard:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Create purchase JSON
+        env:
+          CUSTOMER_ID: ${{ inputs.customer_id }}
+          COMPANY_NAME: ${{ inputs.company_name }}
+          MOTTO: ${{ inputs.motto }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+
+          customer = {
+              "customer_id": os.environ["CUSTOMER_ID"],
+              "company_name": os.environ["COMPANY_NAME"],
+              "motto": os.environ["MOTTO"]
+          }
+
+          with open("purchase.json", "w", encoding="utf-8") as file:
+              json.dump(customer, file)
+          PY
+
+      - name: Validate customer details
+        run: python scripts/onboard.py purchase.json --dry-run

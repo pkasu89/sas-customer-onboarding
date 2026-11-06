@@ -1,0 +1,14 @@
+customer:
+  id: "demo"
+  name: "Demo Company"
+  motto: "Welcome to our company"
+
+nginx:
+  image: "nginx:1.27-alpine"
+  replicas: 2
+
+backend:
+  image: "hashicorp/http-echo:1.0.0"
+
+ingress:
+  host: "demo.customers.example.com"

@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-web
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Welcome to SAS</title>
+    </head>
+    <body>
+      <h1>Welcome to SAS</h1>
+      <h2>{{ .Values.customer.name }}</h2>
+      <p>{{ .Values.customer.motto }}</p>
+    </body>
+    </html>
