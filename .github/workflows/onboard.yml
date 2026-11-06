@@ -27,7 +27,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Create purchase JSON
-        shell: pwsh
+        shell: powershell
         env:
           CUSTOMER_ID: ${{ inputs.customer_id }}
           COMPANY_NAME: ${{ inputs.company_name }}
@@ -39,15 +39,17 @@ jobs:
             motto = $env:MOTTO
           }
 
-          $customer | ConvertTo-Json | Set-Content -Path purchase.json -Encoding utf8
+          $json = $customer | ConvertTo-Json
+          $utf8 = New-Object System.Text.UTF8Encoding($false)
+          [System.IO.File]::WriteAllText("purchase.json", $json, $utf8)
 
       - name: Validate customer details
-        shell: pwsh
+        shell: powershell
         run: |
           python scripts/onboard.py purchase.json --dry-run
 
       - name: Verify deployment tools
-        shell: pwsh
+        shell: powershell
         run: |
           python --version
           helm version --short
