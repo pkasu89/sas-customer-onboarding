@@ -20,36 +20,36 @@ on:
 
 jobs:
   onboard:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Windows, X64]
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
       - name: Create purchase JSON
+        shell: pwsh
         env:
           CUSTOMER_ID: ${{ inputs.customer_id }}
           COMPANY_NAME: ${{ inputs.company_name }}
           MOTTO: ${{ inputs.motto }}
         run: |
-          python - <<'PY'
-          import json
-          import os
-
-          customer = {
-              "customer_id": os.environ["CUSTOMER_ID"],
-              "company_name": os.environ["COMPANY_NAME"],
-              "motto": os.environ["MOTTO"]
+          $customer = @{
+            customer_id = $env:CUSTOMER_ID
+            company_name = $env:COMPANY_NAME
+            motto = $env:MOTTO
           }
 
-          with open("purchase.json", "w", encoding="utf-8") as file:
-              json.dump(customer, file)
-          PY
+          $customer | ConvertTo-Json | Set-Content -Path purchase.json -Encoding utf8
 
       - name: Validate customer details
-        run: python scripts/onboard.py purchase.json --dry-run
+        shell: pwsh
+        run: |
+          python scripts/onboard.py purchase.json --dry-run
+
+      - name: Verify deployment tools
+        shell: pwsh
+        run: |
+          python --version
+          helm version --short
+          kubectl config current-context
+          kubectl get nodes
