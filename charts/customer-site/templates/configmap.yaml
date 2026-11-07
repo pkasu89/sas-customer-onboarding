@@ -11,7 +11,7 @@ data:
     </head>
     <body>
       <h1>Welcome to SAS</h1>
-      <h2>{{ .Values.customer.name }}</h2>
-      <p>{{ .Values.customer.motto }}</p>
+      <h2>{{ .Values.customer.name | html }}</h2>
+      <p>{{ .Values.customer.motto | html }}</p>
     </body>
     </html>

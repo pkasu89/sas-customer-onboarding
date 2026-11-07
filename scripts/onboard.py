@@ -3,6 +3,7 @@ import json
 import os
 import re
 import subprocess
+import tempfile
 from pathlib import Path
 
 
@@ -40,6 +41,25 @@ def onboard(file_name, dry_run=False):
         raise ValueError("Invalid domain")
 
     host = customer_id + "." + domain
+    values = {
+        "customer": {
+            "id": customer_id,
+            "name": name,
+            "motto": motto
+        },
+        "ingress": {
+            "host": host
+        }
+    }
+
+    with tempfile.NamedTemporaryFile(
+        mode="w",
+        encoding="utf-8",
+        suffix=".json",
+        delete=False
+    ) as temp:
+        json.dump(values, temp, ensure_ascii=False)
+        values_file = temp.name
 
     command = [
         "helm", "upgrade", "--install", release, "charts/customer-site",
@@ -48,20 +68,26 @@ def onboard(file_name, dry_run=False):
         "--wait",
         "--rollback-on-failure",
         "--timeout", "5m",
-        "--set-string", "customer.id=" + customer_id,
-        "--set-string", "customer.name=" + name,
-        "--set-string", "customer.motto=" + motto,
-        "--set-string", "ingress.host=" + host,
+        "--values", values_file,
     ]
 
-    if dry_run:
-        print("Customer details look good.")
-        print("Would deploy:", release, "in", namespace)
-        print("Website:", host)
-        return
+    try:
+        if dry_run:
+            print("Customer details look good.")
+            print("Would deploy:", release, "in", namespace)
+            return
 
-    subprocess.run(command, check=True)
-    print("Deployment done. Check https://" + host)
+        subprocess.run(command, check=True)
+        print("Deployment done.")
+        print("To view the website, run:")
+        print(
+            f"kubectl port-forward svc/{release}-nginx "
+            f"8085:80 -n {namespace}"
+        )
+        print("Then open http://localhost:8085")
+
+    finally:
+        Path(values_file).unlink(missing_ok=True)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
